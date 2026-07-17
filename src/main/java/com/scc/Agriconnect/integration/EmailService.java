@@ -34,4 +34,59 @@ public class EmailService {
 
         mailSender.send(message);
     }
+    public void sendRegistrationConfirmation(String toEmail, String fullName, String cooperativeName){
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Thank you for registering" + cooperativeName + "on AgriConnect");
+        message.setText("""
+            Hello %s,
+
+            Thank you for registering %s on AgriConnect.
+
+            Your cooperative is currently under review by our team. We will notify
+            you by email as soon as it has been approved, and you'll be able to
+            log in and start managing your cooperative.
+
+            — The AgriConnect Team
+            """.formatted(fullName, cooperativeName));
+
+        mailSender.send(message);
+    }
+    public void sendApprovalNotification(String toEmail, String fullName, String cooperativeName){
+        String loginLink = frontendUrl + "/login";
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Your cooperative has been approved on Agriconnect");
+        message.setText("""
+                       Hello %s,
+                
+                       Thank you for registering %s on AgriConnect.
+                
+                       Your cooperative is currently under review by our team. We will notify
+                       you by email as soon as it has been approved, and you'll be able to
+                       log in and start managing your cooperative.
+                
+                       — The AgriConnect Team     
+                """.formatted(fullName, cooperativeName));
+        mailSender.send(message);
+    }
+    public void sendRejectionNotification(String toEmail, String fullName, String cooperativeName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Update on your AgriConnect cooperative registration");
+        message.setText("""
+            Hello %s,
+
+            Thank you for your interest in AgriConnect.
+
+            After review, we were unable to approve %s at this time.
+
+            If you believe this was a mistake or would like more information,
+            please contact our support team.
+
+            — The AgriConnect Team
+            """.formatted(fullName, cooperativeName));
+
+        mailSender.send(message);
+    }
 }
