@@ -2,6 +2,7 @@ package com.scc.Agriconnect.service;
 
 import com.scc.Agriconnect.dto.*;
 import com.scc.Agriconnect.entity.*;
+import com.scc.Agriconnect.integration.EmailService;
 import com.scc.Agriconnect.repository.*;
 import com.scc.Agriconnect.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -54,6 +56,13 @@ public class AuthService {
 
         user.setCooperative(cooperative);
         userRepository.save(user);
+
+        try {
+            emailService.sendRegistrationConfirmation(
+                    user.getEmail(), user.getFullName(), cooperative.getName());
+        } catch (Exception e) {
+            System.err.println("⚠️ Failed to send registration confirmation email: " + e.getMessage());
+        }
 
         return buildAuthResponse(user, cooperative);
     }
