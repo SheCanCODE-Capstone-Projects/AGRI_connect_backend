@@ -13,43 +13,43 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "stock")
+@Table(name = "sale")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Stock {
+public class Sale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "stock_id")
-    private Long stockId;
+    @Column(name = "sale_id")
+    private Long saleId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sale_id")
-    private Sale sale;
+    @JoinColumn(name = "cooperative_id", nullable = false)
+    private Cooperative cooperative;
 
-    @Column(name = "quantity", nullable = false)
-    private BigDecimal quantity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "stock_type", nullable = false)
-    private StockType stockType;
+    @Column(name = "quantity_sold", nullable = false)
+    private BigDecimal quantitySold;
 
-    @Column(name = "stock_date")
-    private LocalDate stockDate;
+    @Column(name = "total_amount", nullable = false)
+    private BigDecimal totalAmount;
+
+    @Column(name = "sale_date")
+    private LocalDate saleDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recorded_by_user_id", nullable = false)
     private User recordedBy;
-
-    @Column(columnDefinition = "TEXT")
-    private String notes;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
