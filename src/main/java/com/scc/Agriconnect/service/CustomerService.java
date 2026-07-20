@@ -50,7 +50,6 @@ public class CustomerService {
         return customerRepository.findByCooperative_CooperativeId(cooperative.getCooperativeId());
     }
 
-    // --- helpers ---
 
     private Customer getOwnedCustomerOrThrow(Long customerId) {
         Cooperative cooperative = getCurrentUserCooperative();
