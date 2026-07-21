@@ -1,7 +1,5 @@
 package com.scc.Agriconnect.dto;
 
-import com.scc.Agriconnect.dto.PasswordConfirmable;
-import com.scc.Agriconnect.dto.PasswordMatches;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -9,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor @AllArgsConstructor
 @Builder
 @PasswordMatches
-public class RegisterRequest {
+public class RegisterRequest implements PasswordConfirmable {
 
     @NotBlank(message = "Full name is required")
     private String fullName;
