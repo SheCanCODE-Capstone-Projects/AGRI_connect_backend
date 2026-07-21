@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +52,7 @@ public class SaleService {
             customer = customerRepository.findById(request.getCustomerId())
                     .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + request.getCustomerId()));
             if (!customer.getCooperative().getCooperativeId().equals(cooperative.getCooperativeId())) {
-                throw new IllegalStateException("Customer does not belong to this cooperative");
+                throw new IllegalStateException("Customer does not beUUID to this cooperative");
             }
         }
 
@@ -87,7 +88,7 @@ public class SaleService {
                 .map(saleMapper::toResponse);
     }
 
-    public SaleResponse getSaleById(Long saleId) {
+    public SaleResponse getSaleById(UUID saleId) {
         Cooperative cooperative = getCurrentUserCooperative();
         Sale sale = saleRepository.findById(saleId)
                 .orElseThrow(() -> new IllegalArgumentException("Sale not found: " + saleId));

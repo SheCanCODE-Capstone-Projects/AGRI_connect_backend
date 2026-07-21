@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public Customer update(Long customerId, CustomerRequest request) {
+    public Customer update(UUID customerId, CustomerRequest request) {
         Customer customer = getOwnedCustomerOrThrow(customerId);
 
         customer.setFullName(request.getFullName());
@@ -51,7 +52,7 @@ public class CustomerService {
     }
 
 
-    private Customer getOwnedCustomerOrThrow(Long customerId) {
+    private Customer getOwnedCustomerOrThrow(UUID customerId) {
         Cooperative cooperative = getCurrentUserCooperative();
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + customerId));

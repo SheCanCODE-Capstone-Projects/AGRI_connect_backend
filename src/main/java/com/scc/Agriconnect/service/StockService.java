@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +77,7 @@ public class StockService {
         return stockMapper.toResponse(savedStock);
     }
 
-    public Page<StockResponse> getProductStockHistory(Long productId, Pageable pageable) {
+    public Page<StockResponse> getProductStockHistory(UUID productId, Pageable pageable) {
         getOwnedProduct(productId, getCurrentUser());
         return stockRepository.findByProduct_ProductId(productId, pageable).map(stockMapper::toResponse);
     }
@@ -87,14 +88,14 @@ public class StockService {
                 .map(stockMapper::toResponse);
     }
 
-    public BigDecimal getCurrentStock(Long productId) {
+    public BigDecimal getCurrentStock(UUID productId) {
         Product product = getOwnedProduct(productId, getCurrentUser());
         return product.getCurrentStockLevel() != null ? product.getCurrentStockLevel() : BigDecimal.ZERO;
     }
 
     // --- helpers ---
 
-    private Product getOwnedProductForUpdate(Long productId, User user) {
+    private Product getOwnedProductForUpdate(UUID productId, User user) {
         Cooperative cooperative = requireCooperative(user);
         Product product = productRepository.findByIdForUpdate(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
@@ -102,7 +103,7 @@ public class StockService {
         return product;
     }
 
-    private Product getOwnedProduct(Long productId, User user) {
+    private Product getOwnedProduct(UUID productId, User user) {
         Cooperative cooperative = requireCooperative(user);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));

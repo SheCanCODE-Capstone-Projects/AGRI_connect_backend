@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cooperative/stock")
@@ -28,7 +29,7 @@ public class StockController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<Page<StockResponse>> productHistory(@PathVariable Long productId,
+    public ResponseEntity<Page<StockResponse>> productHistory(@PathVariable UUID productId,
                                                                 @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(stockService.getProductStockHistory(productId, pageable));
     }
@@ -39,7 +40,7 @@ public class StockController {
     }
 
     @GetMapping("/product/{productId}/current")
-    public ResponseEntity<BigDecimal> currentStock(@PathVariable Long productId) {
+    public ResponseEntity<BigDecimal> currentStock(@PathVariable UUID productId) {
         return ResponseEntity.ok(stockService.getCurrentStock(productId));
     }
 }

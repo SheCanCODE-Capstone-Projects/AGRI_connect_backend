@@ -5,12 +5,13 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
 public class ProductResponse {
-    private Long productId;
-    private Long cooperativeId;
+    private UUID productId;
+    private UUID cooperativeId;
     private String name;
     private String category;
     private String description;

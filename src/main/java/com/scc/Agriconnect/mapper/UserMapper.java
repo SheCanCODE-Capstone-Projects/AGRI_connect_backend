@@ -9,7 +9,7 @@ public class UserMapper {
                 .userId(u.getUserId())
                 .fullName(u.getFullName())
                 .email(u.getEmail())
-                .role(u.getRole().getName())
+                .role(u.getRole().name())
                 .cooperativeId(u.getCooperative() != null ? u.getCooperative().getCooperativeId() : null)
                 .build();
     }

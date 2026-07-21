@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cooperative/products")
@@ -27,14 +28,14 @@ public class ProductController {
 
     @PreAuthorize("hasAnyRole('PRESIDENT', 'STAFF')")
     @PutMapping("/{productId}")
-    public ResponseEntity<ProductResponse> update(@PathVariable Long productId,
+    public ResponseEntity<ProductResponse> update(@PathVariable UUID productId,
                                                    @Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(ProductMapper.toResponse(productService.update(productId, request)));
     }
 
     @PreAuthorize("hasAnyRole('PRESIDENT', 'STAFF')")
     @PatchMapping("/{productId}/visibility")
-    public ResponseEntity<ProductResponse> setVisibility(@PathVariable Long productId,
+    public ResponseEntity<ProductResponse> setVisibility(@PathVariable UUID productId,
                                                           @RequestParam boolean visible) {
         return ResponseEntity.ok(ProductMapper.toResponse(productService.setVisibility(productId, visible)));
     }

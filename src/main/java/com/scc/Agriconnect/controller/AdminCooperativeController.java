@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin/cooperatives")
@@ -24,12 +25,12 @@ public class AdminCooperativeController {
     }
 
     @PatchMapping("/{id}/approve")
-    public ResponseEntity<CooperativeResponse> approve(@PathVariable Long id) {
+    public ResponseEntity<CooperativeResponse> approve(@PathVariable UUID id) {
         return ResponseEntity.ok(CooperativeMapper.toResponse(adminCooperativeService.approve(id)));
     }
 
     @PatchMapping("/{id}/reject")
-    public ResponseEntity<CooperativeResponse> reject(@PathVariable Long id) {
+    public ResponseEntity<CooperativeResponse> reject(@PathVariable UUID id) {
         return ResponseEntity.ok(CooperativeMapper.toResponse(adminCooperativeService.reject(id)));
     }
 }

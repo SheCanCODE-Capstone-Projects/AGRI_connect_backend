@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,9 +18,9 @@ import java.time.LocalDate;
 public class SaleRequest {
 
     @NotNull(message = "Product ID is required")
-    private Long productId;
+    private UUID productId;
 
-    private Long customerId;
+    private UUID customerId;
 
     @NotNull(message = "Quantity sold is required")
     @Min(value = 1, message = "Quantity sold must be greater than 0")

@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cooperative/sales")
@@ -33,7 +34,7 @@ public class SaleController {
     }
 
     @GetMapping("/{saleId}")
-    public ResponseEntity<SaleResponse> get(@PathVariable Long saleId) {
+    public ResponseEntity<SaleResponse> get(@PathVariable UUID saleId) {
         return ResponseEntity.ok(saleService.getSaleById(saleId));
     }
 

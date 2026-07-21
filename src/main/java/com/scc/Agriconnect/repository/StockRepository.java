@@ -12,28 +12,29 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface StockRepository extends JpaRepository<Stock, Long> {
+public interface StockRepository extends JpaRepository<Stock, UUID> {
 
-    Page<Stock> findByProduct_ProductId(Long productId, Pageable pageable);
+    Page<Stock> findByProduct_ProductId(UUID productId, Pageable pageable);
 
-    Page<Stock> findByProduct_Cooperative_CooperativeId(Long cooperativeId, Pageable pageable);
+    Page<Stock> findByProduct_Cooperative_CooperativeId(UUID cooperativeId, Pageable pageable);
 
-    List<Stock> findByProduct_ProductIdAndStockType(Long productId, StockType stockType);
+    List<Stock> findByProduct_ProductIdAndStockType(UUID productId, StockType stockType);
 
     @Query("SELECT COALESCE(SUM(s.quantity), 0) FROM Stock s " +
            "WHERE s.product.productId = :productId " +
            "AND s.stockType = 'IN'")
-    BigDecimal getTotalStockIn(@Param("productId") Long productId);
+    BigDecimal getTotalStockIn(@Param("productId") UUID productId);
 
     @Query("SELECT COALESCE(SUM(s.quantity), 0) FROM Stock s " +
            "WHERE s.product.productId = :productId " +
            "AND s.stockType = 'OUT'")
-    BigDecimal getTotalStockOut(@Param("productId") Long productId);
+    BigDecimal getTotalStockOut(@Param("productId") UUID productId);
 
     List<Stock> findByProduct_ProductIdAndStockDateBetween(
-            Long productId,
+            UUID productId,
             LocalDate startDate,
             LocalDate endDate);
 
@@ -42,11 +43,11 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
            "AND s.stockDate BETWEEN :startDate AND :endDate " +
            "GROUP BY s.stockType")
     List<Object[]> getStockSummaryByDateRange(
-            @Param("cooperativeId") Long cooperativeId,
+            @Param("cooperativeId") UUID cooperativeId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    List<Stock> findBySale_SaleId(Long saleId);
+    List<Stock> findBySale_SaleId(UUID saleId);
 
-    boolean existsByProduct_ProductId(Long productId);
+    boolean existsByProduct_ProductId(UUID productId);
 }

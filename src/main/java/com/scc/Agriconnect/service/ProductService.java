@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +43,7 @@ public class ProductService {
     }
 
     @Transactional
-    public Product update(Long productId, ProductRequest request) {
+    public Product update(UUID productId, ProductRequest request) {
         Product product = getOwnedProductOrThrow(productId);
 
         product.setName(request.getName());
@@ -57,7 +58,7 @@ public class ProductService {
     }
 
     @Transactional
-    public Product setVisibility(Long productId, boolean visible) {
+    public Product setVisibility(UUID productId, boolean visible) {
         Product product = getOwnedProductOrThrow(productId);
         product.setStatus(visible ? Product.ProductStatus.VISIBLE : Product.ProductStatus.HIDDEN);
         return productRepository.save(product);
@@ -70,7 +71,7 @@ public class ProductService {
 
     // --- helpers ---
 
-    private Product getOwnedProductOrThrow(Long productId) {
+    private Product getOwnedProductOrThrow(UUID productId) {
         Cooperative cooperative = getCurrentUserCooperative();
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));

@@ -4,7 +4,8 @@ import com.scc.Agriconnect.entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    List<Customer> findByCooperative_CooperativeId(Long cooperativeId);
+public interface CustomerRepository extends JpaRepository<Customer, UUID> {
+    List<Customer> findByCooperative_CooperativeId(UUID cooperativeId);
 }
