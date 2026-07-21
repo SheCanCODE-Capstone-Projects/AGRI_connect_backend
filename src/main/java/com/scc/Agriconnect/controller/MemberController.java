@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/members")
@@ -37,22 +38,22 @@ public class MemberController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MemberResponse> getOne(@PathVariable Long id) {
+    public ResponseEntity<MemberResponse> getOne(@PathVariable UUID id) {
         return ResponseEntity.ok(MemberMapper.toResponse(memberService.getOne(id)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MemberResponse> update(@PathVariable Long id, @Valid @RequestBody MemberRequest request) {
+    public ResponseEntity<MemberResponse> update(@PathVariable UUID id, @Valid @RequestBody MemberRequest request) {
         return ResponseEntity.ok(MemberMapper.toResponse(memberService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<MemberResponse> softDelete(@PathVariable Long id) {
+    public ResponseEntity<MemberResponse> softDelete(@PathVariable UUID id) {
         return ResponseEntity.ok(MemberMapper.toResponse(memberService.softDelete(id)));
     }
 
     @PatchMapping("/{id}/reactivate")
-    public ResponseEntity<MemberResponse> reactivate(@PathVariable Long id) {
+    public ResponseEntity<MemberResponse> reactivate(@PathVariable UUID id) {
         return ResponseEntity.ok(MemberMapper.toResponse(memberService.reactivate(id)));
     }
 }

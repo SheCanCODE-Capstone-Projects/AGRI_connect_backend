@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "cooperatives")
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 public class Cooperative {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cooperativeId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID cooperativeId;
 
     private String name;
     private String registrationNumber;
@@ -29,9 +30,8 @@ public class Cooperative {
 
     private String imageUrl;
 
-    @Builder.Default
     @Enumerated(EnumType.STRING)
-    private CooperativeStatus status = CooperativeStatus.PENDING;
+    private CooperativeStatus status;
 
     @OneToOne
     @JoinColumn(name = "president_user_id", unique = true)
@@ -40,5 +40,10 @@ public class Cooperative {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (status == null) status = CooperativeStatus.PENDING;
+    }
     public enum CooperativeStatus { PENDING, APPROVED, REJECTED }
 }

@@ -62,12 +62,11 @@ public class EmailService {
                 
                        Thank you for registering %s on AgriConnect.
                 
-                       Your cooperative is currently under review by our team. We will notify
-                       you by email as soon as it has been approved, and you'll be able to
-                       log in and start managing your cooperative.
-                
-                       — The AgriConnect Team     
-                """.formatted(fullName, cooperativeName));
+                       Your cooperative have been approved, follow this link to login:
+                       %s.
+               
+                       — The AgriConnect Team
+                """.formatted(fullName, cooperativeName, loginLink));
         mailSender.send(message);
     }
     public void sendRejectionNotification(String toEmail, String fullName, String cooperativeName) {

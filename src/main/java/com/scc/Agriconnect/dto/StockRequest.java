@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ import java.time.LocalDate;
 public class StockRequest {
 
     @NotNull(message = "Product ID is required")
-    private Long productId;
+    private UUID productId;
 
     @NotNull(message = "Stock type is required")
     private StockType stockType;
@@ -31,5 +32,5 @@ public class StockRequest {
 
     private String notes;
 
-    private Long saleId;
+    private UUID saleId;
 }

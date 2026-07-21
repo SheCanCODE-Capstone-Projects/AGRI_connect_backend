@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -16,8 +17,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class StockResponse {
 
-    private Long stockId;
-    private Long productId;
+    private UUID stockId;
+    private UUID productId;
     private String productName;
     private String category;
     private BigDecimal quantity;
@@ -25,6 +26,6 @@ public class StockResponse {
     private LocalDate stockDate;
     private String recordedByFullName;
     private String notes;
-    private Long saleId;
+    private UUID saleId;
     private LocalDateTime createdAt;
 }

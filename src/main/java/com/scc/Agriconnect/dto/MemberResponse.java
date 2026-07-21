@@ -3,10 +3,11 @@ package com.scc.Agriconnect.dto;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter @Setter @Builder
 public class MemberResponse {
-    private Long memberId;
+    private UUID memberId;
     private String fullName;
     private String phoneNumber;
     private String nationalId;

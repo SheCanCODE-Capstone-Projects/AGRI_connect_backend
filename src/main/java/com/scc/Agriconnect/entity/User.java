@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -19,8 +20,8 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID userId;
 
     private String fullName;
     private String phoneNumber;
@@ -31,32 +32,47 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String passwordHash;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id")
-    private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoleType role;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cooperative_id")
     private Cooperative cooperative;
 
-    @Builder.Default
     @Enumerated(EnumType.STRING)
-    private UserStatus status = UserStatus.ACTIVE;
+    private UserStatus status;
 
-    @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate(){
+        createdAt = LocalDateTime.now();
+        if(status == null) status = UserStatus.ACTIVE;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
-    @Override public String getPassword() { return passwordHash; }
-    @Override public String getUsername() { return email; }
-    @Override public boolean isAccountNonExpired() { return true; }
-    @Override public boolean isAccountNonLocked() { return status != UserStatus.SUSPENDED; }
-    @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return status == UserStatus.ACTIVE; }
+    @Override
+    public String getPassword() { return passwordHash; }
+
+    @Override
+    public String getUsername() { return email; }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return status != UserStatus.SUSPENDED; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return status == UserStatus.ACTIVE; }
 
     public enum UserStatus { ACTIVE, SUSPENDED }
 }

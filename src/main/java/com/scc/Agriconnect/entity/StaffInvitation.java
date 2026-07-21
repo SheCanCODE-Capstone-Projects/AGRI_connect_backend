@@ -15,8 +15,8 @@ import java.util.UUID;
 public class StaffInvitation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long invitationId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID invitationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cooperative_id", nullable = false)
@@ -25,9 +25,9 @@ public class StaffInvitation {
     @Column(nullable = false)
     private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoleType role;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invited_by_user_id", nullable = false)

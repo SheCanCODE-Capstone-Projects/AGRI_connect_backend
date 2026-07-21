@@ -4,12 +4,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 public class CustomerResponse {
-    private Long customerId;
-    private Long cooperativeId;
+    private UUID customerId;
+    private UUID cooperativeId;
     private String fullName;
     private String phoneNumber;
     private String address;

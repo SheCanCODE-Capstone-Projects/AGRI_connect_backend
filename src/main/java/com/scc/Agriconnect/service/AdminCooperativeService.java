@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class AdminCooperativeService {
         return cooperativeRepository.findByStatus(Cooperative.CooperativeStatus.PENDING);
     }
 
-    public Cooperative approve(Long id) {
+    public Cooperative approve(UUID id) {
         Cooperative coop = getOrThrow(id);
         coop.setStatus(Cooperative.CooperativeStatus.APPROVED);
         Cooperative saved = cooperativeRepository.save(coop);
@@ -35,7 +36,7 @@ public class AdminCooperativeService {
         return saved;
     }
 
-    public Cooperative reject(Long id) {
+    public Cooperative reject(UUID id) {
         Cooperative coop = getOrThrow(id);
         coop.setStatus(Cooperative.CooperativeStatus.REJECTED);
         Cooperative saved = cooperativeRepository.save(coop);
@@ -51,7 +52,7 @@ public class AdminCooperativeService {
         return saved;
     }
 
-    private Cooperative getOrThrow(Long id) {
+    private Cooperative getOrThrow(UUID id) {
         return cooperativeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cooperative not found: " + id));
     }

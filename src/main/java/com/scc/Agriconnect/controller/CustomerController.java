@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cooperative/customers")
@@ -27,7 +28,7 @@ public class CustomerController {
 
     @PreAuthorize("hasAnyRole('PRESIDENT', 'ACCOUNTANT', 'STOCKMANAGER')")
     @PutMapping("/{customerId}")
-    public ResponseEntity<CustomerResponse> update(@PathVariable Long customerId,
+    public ResponseEntity<CustomerResponse> update(@PathVariable UUID customerId,
                                                     @Valid @RequestBody CustomerRequest request) {
         return ResponseEntity.ok(CustomerMapper.toResponse(customerService.update(customerId, request)));
     }

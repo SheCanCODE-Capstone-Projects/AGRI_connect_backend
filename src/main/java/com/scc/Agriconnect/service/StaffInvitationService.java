@@ -18,7 +18,6 @@ public class StaffInvitationService {
 
     private final StaffInvitationRepository invitationRepository;
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -38,8 +37,18 @@ public class StaffInvitationService {
             throw new IllegalArgumentException("This email already has a pending invitation");
         }
 
-        Role role = roleRepository.findByName(request.getRoleName())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown role: " + request.getRoleName()));
+        RoleType role;
+        try {
+            role = RoleType.valueOf(request.getRoleName());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Unknown role: " + request.getRoleName());
+        }
+
+        // Optional but recommended: block inviting someone as PRESIDENT or SYSTEM_ADMIN
+        // through the staff-invite flow — those roles are created through registration/bootstrap only.
+        if (role == RoleType.PRESIDENT || role == RoleType.SYSTEM_ADMIN) {
+            throw new IllegalArgumentException("Cannot invite staff with role: " + role);
+        }
 
         StaffInvitation invitation = invitationRepository.save(StaffInvitation.builder()
                 .cooperative(cooperative)
@@ -49,7 +58,7 @@ public class StaffInvitationService {
                 .build());
 
         emailService.sendStaffInvitation(
-                invitation.getEmail(), cooperative.getName(), role.getName(), invitation.getToken());
+                invitation.getEmail(), cooperative.getName(), role.name(), invitation.getToken());
 
         return invitation;
     }
@@ -70,6 +79,7 @@ public class StaffInvitationService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(invitation.getRole())
                 .cooperative(invitation.getCooperative())
+                .status(User.UserStatus.ACTIVE)
                 .build());
 
         invitation.setStatus(StaffInvitation.InvitationStatus.ACCEPTED);
