@@ -2,6 +2,7 @@ package com.scc.Agriconnect.service;
 
 import com.scc.Agriconnect.dto.*;
 import com.scc.Agriconnect.entity.*;
+import com.scc.Agriconnect.Exception.*;
 import com.scc.Agriconnect.integration.EmailService;
 import com.scc.Agriconnect.repository.*;
 import com.scc.Agriconnect.security.JwtUtil;
@@ -14,11 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private static final String PRESIDENT_ROLE = "PRESIDENT";
-
     private final UserRepository userRepository;
     private final CooperativeRepository cooperativeRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
@@ -32,18 +30,18 @@ public class AuthService {
             throw new IllegalArgumentException("A cooperative with this registration number already exists");
         }
 
-        Role presidentRole = roleRepository.findByName(PRESIDENT_ROLE)
-                .orElseThrow(() -> new IllegalStateException("PRESIDENT role not seeded"));
-
-        User user = userRepository.save(User.builder()
+        User user = User.builder()
                 .fullName(request.getFullName())
                 .phoneNumber(request.getPhoneNumber())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(presidentRole)
-                .build());
+                .role(RoleType.PRESIDENT)
+                .status(User.UserStatus.ACTIVE)
+                .cooperative(null)
+                .build();
+        user = userRepository.save(user);
 
-        Cooperative cooperative = cooperativeRepository.save(Cooperative.builder()
+        Cooperative cooperative = Cooperative.builder()
                 .name(request.getCooperativeName())
                 .registrationNumber(request.getRegistrationNumber())
                 .province(request.getProvince())
@@ -51,49 +49,46 @@ public class AuthService {
                 .sector(request.getSector())
                 .contactInfo(request.getContactInfo())
                 .description(request.getDescription())
+                .status(Cooperative.CooperativeStatus.PENDING)
                 .president(user)
-                .build());
+                .build();
+        cooperative = cooperativeRepository.save(cooperative);
 
         user.setCooperative(cooperative);
         userRepository.save(user);
 
-        try {
-            emailService.sendRegistrationConfirmation(
-                    user.getEmail(), user.getFullName(), cooperative.getName());
-        } catch (Exception e) {
-            System.err.println("⚠️ Failed to send registration confirmation email: " + e.getMessage());
-        }
+        String token = jwtUtil.generateToken(user);
 
-        return buildAuthResponse(user, cooperative);
-    }
-
-    public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid email or password");
-        }
-
-        Cooperative cooperative = user.getCooperative();
-        if (cooperative != null && cooperative.getStatus() != Cooperative.CooperativeStatus.APPROVED) {
-            throw new IllegalStateException(
-                    cooperative.getStatus() == Cooperative.CooperativeStatus.PENDING
-                            ? "Your cooperative registration is still pending approval"
-                            : "Your cooperative registration was rejected");
-        }
-
-        return buildAuthResponse(user, cooperative);
-    }
-
-    private AuthResponse buildAuthResponse(User user, Cooperative cooperative) {
         return AuthResponse.builder()
-                .token(jwtUtil.generateToken(user))
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .role(user.getRole().getName())
-                .cooperativeId(cooperative != null ? cooperative.getCooperativeId() : null)
-                .cooperativeStatus(cooperative != null ? cooperative.getStatus().name() : null)
+                .accessToken(token)
+                .tokenType("Bearer")
                 .build();
     }
-}
+        public AuthResponse login(LoginRequest request) {
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+
+            if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+                throw new InvalidCredentialsException("Invalid email or password");
+            }
+
+            if (user.getCooperative() != null
+                    && user.getCooperative().getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+
+                if (user.getCooperative().getStatus() == Cooperative.CooperativeStatus.PENDING) {
+                    throw new CooperativeNotApprovedException(
+                            "Your cooperative registration is still pending approval. Please wait for a system admin to review it.");
+                } else {
+                    throw new CooperativeNotApprovedException(
+                            "Your cooperative registration was rejected. Please contact support.");
+                }
+            }
+
+            String token = jwtUtil.generateToken(user);
+
+            return AuthResponse.builder()
+                    .accessToken(token)
+                    .tokenType("Bearer")
+                    .build();
+        }
+    }

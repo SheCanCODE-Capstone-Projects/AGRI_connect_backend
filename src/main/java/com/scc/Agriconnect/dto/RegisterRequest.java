@@ -9,19 +9,42 @@ import lombok.*;
 @NoArgsConstructor @AllArgsConstructor
 @Builder
 @PasswordMatches
-public class RegisterRequest implements PasswordConfirmable {
+public class RegisterRequest {
 
-    @NotBlank private String fullName;
-    @NotBlank private String phoneNumber;
-    @NotBlank @Email private String email;
-    @NotBlank @Size(min = 8) private String password;
-    @NotBlank private String confirmPassword;
+    @NotBlank(message = "Full name is required")
+    private String fullName;
 
-    @NotBlank private String cooperativeName;
-    @NotBlank private String registrationNumber;
-    @NotBlank private String province;
-    @NotBlank private String district;
-    @NotBlank private String sector;
-    @NotBlank private String contactInfo;
+    @NotBlank(message = "Phone number is required")
+    private String phoneNumber;
+
+    @NotBlank(message = "Email is required")
+    @Email (message = "Email must be valid")
+    private String email;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must at least be 8 characters")
+    private String password;
+
+    @NotBlank(message = "Please confirm your password")
+    private String confirmPassword;
+
+    @NotBlank(message = "Cooperative name is required")
+    private String cooperativeName;
+
+    @NotBlank(message = "Registration number is required")
+    private String registrationNumber;
+
+    @NotBlank(message = "Province is required")
+    private String province;
+
+    @NotBlank(message = "District is required")
+    private String district;
+
+    @NotBlank(message = "Sector is required")
+    private String sector;
+
+    @NotBlank(message = "Contact info is required")
+    private String contactInfo;
+
     private String description;
 }

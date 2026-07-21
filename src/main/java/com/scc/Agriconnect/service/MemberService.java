@@ -5,6 +5,7 @@ import com.scc.Agriconnect.entity.Member;
 import com.scc.Agriconnect.entity.User;
 import com.scc.Agriconnect.dto.MemberRequest;
 import com.scc.Agriconnect.repository.MemberRepository;
+import io.swagger.v3.oas.models.media.UUIDSchema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,16 +37,16 @@ public class MemberService {
     }
 
     public List<Member> list(Member.MembershipStatus status, String name) {
-        Long cooperativeId = getCurrentCooperative().getCooperativeId();
+        UUID cooperativeId = getCurrentCooperative().getCooperativeId();
         return memberRepository.search(cooperativeId, status, name);
     }
 
-    public Member getOne(Long memberId) {
+    public Member getOne(UUID memberId) {
         return findScopedOrThrow(memberId);
     }
 
     @Transactional
-    public Member update(Long memberId, MemberRequest request) {
+    public Member update(UUID memberId, MemberRequest request) {
         Member member = findScopedOrThrow(memberId);
 
         member.setFullName(request.getFullName());
@@ -60,21 +62,21 @@ public class MemberService {
     }
 
     @Transactional
-    public Member softDelete(Long memberId) {
+    public Member softDelete(UUID memberId) {
         Member member = findScopedOrThrow(memberId);
         member.setMembershipStatus(Member.MembershipStatus.INACTIVE);
         return memberRepository.save(member);
     }
 
     @Transactional
-    public Member reactivate(Long memberId) {
+    public Member reactivate(UUID memberId) {
         Member member = findScopedOrThrow(memberId);
         member.setMembershipStatus(Member.MembershipStatus.ACTIVE);
         return memberRepository.save(member);
     }
 
-    private Member findScopedOrThrow(Long memberId) {
-        Long cooperativeId = getCurrentCooperative().getCooperativeId();
+    private Member findScopedOrThrow(UUID memberId) {
+        UUID cooperativeId = getCurrentCooperative().getCooperativeId();
         return memberRepository.findByMemberIdAndCooperative_CooperativeId(memberId, cooperativeId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found in your cooperative"));
     }

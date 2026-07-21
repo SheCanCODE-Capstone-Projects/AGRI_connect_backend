@@ -8,7 +8,7 @@ public class InvitationMapper {
         return InvitationResponse.builder()
                 .invitationId(i.getInvitationId())
                 .email(i.getEmail())
-                .role(i.getRole().getName())
+                .role(i.getRole().name())
                 .status(i.getStatus().name())
                 .build();
     }

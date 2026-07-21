@@ -2,9 +2,11 @@ package com.scc.Agriconnect.dto;
 
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter @Setter @Builder
 public class CooperativeResponse {
-    private Long cooperativeId;
+    private UUID cooperativeId;
     private String name;
     private String registrationNumber;
     private String province;

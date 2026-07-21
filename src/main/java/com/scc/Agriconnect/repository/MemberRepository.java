@@ -7,8 +7,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, UUID> {
 
     @Query("""
             SELECT m FROM Member m
@@ -18,10 +19,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             ORDER BY m.fullName ASC
             """)
     List<Member> search(
-            @Param("cooperativeId") Long cooperativeId,
+            @Param("cooperativeId") UUID cooperativeId,
             @Param("status") Member.MembershipStatus status,
             @Param("name") String name
     );
 
-    Optional<Member> findByMemberIdAndCooperative_CooperativeId(Long memberId, Long cooperativeId);
+    Optional<Member> findByMemberIdAndCooperative_CooperativeId(UUID memberId, UUID cooperativeId);
 }
