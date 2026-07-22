@@ -66,20 +66,20 @@ public class AuthService {
     }
         public AuthResponse login(LoginRequest request) {
             User user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+                    .orElseThrow(() -> new IllegalStateException("Invalid email or password"));
 
             if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-                throw new InvalidCredentialsException("Invalid email or password");
+                throw new IllegalStateException("Invalid email or password");
             }
 
             if (user.getCooperative() != null
                     && user.getCooperative().getStatus() != Cooperative.CooperativeStatus.APPROVED) {
 
                 if (user.getCooperative().getStatus() == Cooperative.CooperativeStatus.PENDING) {
-                    throw new CooperativeNotApprovedException(
+                    throw new IllegalArgumentException(
                             "Your cooperative registration is still pending approval. Please wait for a system admin to review it.");
                 } else {
-                    throw new CooperativeNotApprovedException(
+                    throw new IllegalArgumentException(
                             "Your cooperative registration was rejected. Please contact support.");
                 }
             }
