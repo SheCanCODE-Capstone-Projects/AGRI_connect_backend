@@ -1,8 +1,5 @@
 package com.scc.Agriconnect.dto;
 
-import com.scc.Agriconnect.dto.PasswordConfirmable;
-import com.scc.Agriconnect.dto.PasswordMatches;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -10,8 +7,7 @@ import lombok.*;
 @NoArgsConstructor @AllArgsConstructor
 @Builder
 @PasswordMatches
-@Schema(description = "Request payload for registering a new cooperative with president account")
-public class RegisterRequest {
+public class RegisterRequest implements PasswordConfirmable {
 
     @Schema(description = "Full name of the cooperative president", example = "John Doe Uwase")
     @NotBlank(message = "Full name is required")
