@@ -5,6 +5,7 @@ import com.scc.Agriconnect.entity.Cooperative;
 import com.scc.Agriconnect.entity.Product;
 import com.scc.Agriconnect.entity.User;
 import com.scc.Agriconnect.repository.ProductRepository;
+import com.scc.Agriconnect.repository.StockRepository;
 import com.scc.Agriconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final StockRepository stockRepository;
 
     @Transactional
     public Product create(ProductRequest request) {
@@ -62,6 +64,19 @@ public class ProductService {
         Product product = getOwnedProductOrThrow(productId);
         product.setStatus(visible ? Product.ProductStatus.VISIBLE : Product.ProductStatus.HIDDEN);
         return productRepository.save(product);
+    }
+
+    @Transactional
+    public void delete(UUID productId) {
+        Product product = getOwnedProductOrThrow(productId);
+
+        boolean hasStockRecords = stockRepository.existsByProduct_ProductId(productId);
+        if (hasStockRecords) {
+            throw new IllegalStateException(
+                    "This product has stock history and cannot be deleted. Hide it instead.");
+        }
+
+        productRepository.delete(product);
     }
 
     public List<Product> listForCurrentCooperative() {
