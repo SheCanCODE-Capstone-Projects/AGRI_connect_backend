@@ -1,5 +1,6 @@
 package com.scc.Agriconnect.dto;
 
+import com.scc.Agriconnect.entity.ProductUnit;
 import com.scc.Agriconnect.entity.StockType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -33,8 +34,11 @@ public class StockResponse {
     
     @Schema(description = "Quantity moved (positive for IN, same value for OUT)", example = "25.5")
     private BigDecimal quantity;
-    
-    @Schema(description = "Type of movement", example = "IN", allowableValues = {"IN", "OUT"})
+
+    @Schema(description = "Unit of measurement", example = "KG")
+    private ProductUnit unit;
+
+    @Schema(description = "Type of movement", example = "IN", allowableValues = {"IN", "OUT", "ADJUSTMENT"})
     private StockType stockType;
     
     @Schema(description = "Date of the movement", example = "2024-01-20")

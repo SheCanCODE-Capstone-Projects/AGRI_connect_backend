@@ -1,5 +1,6 @@
 package com.scc.Agriconnect.dto;
 
+import com.scc.Agriconnect.entity.ProductUnit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -25,6 +26,14 @@ public class ProductRequest {
     @NotNull(message = "Unit price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Unit price must be greater than 0")
     private BigDecimal unitPrice;
+
+    @Schema(description = "Unit of measurement", example = "KG")
+    @NotNull(message = "Unit of measurement is required")
+    private ProductUnit unit;
+
+    @Schema(description = "Stock level at or below which the product needs reordering", example = "10")
+    @DecimalMin(value = "0.0", message = "Reorder threshold cannot be negative")
+    private BigDecimal reorderThreshold;
 
     @Schema(description = "Location where product is stored", example = "Warehouse A, Shelf 5")
     private String storageLocation;

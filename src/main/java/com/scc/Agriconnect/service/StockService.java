@@ -43,20 +43,25 @@ public class StockService {
                 ? product.getCurrentStockLevel() : BigDecimal.ZERO;
 
         Sale sale = null;
-        if (request.getStockType() == StockType.OUT) {
+        if (request.getStockType() == StockType.IN) {
+            if (request.getSaleId() != null) {
+                throw new IllegalArgumentException("Sale ID must not be set for a STOCK IN movement");
+            }
+        } else {
             if (currentStock.compareTo(request.getQuantity()) < 0) {
                 throw new IllegalArgumentException(
                         "Insufficient stock. Available: " + currentStock + ", requested: " + request.getQuantity());
             }
-            if (request.getSaleId() != null) {
+            if (request.getStockType() == StockType.ADJUSTMENT && request.getSaleId() != null) {
+                throw new IllegalArgumentException("Sale ID must not be set for a STOCK ADJUSTMENT movement");
+            }
+            if (request.getStockType() == StockType.OUT && request.getSaleId() != null) {
                 sale = saleRepository.findById(request.getSaleId())
                         .orElseThrow(() -> new IllegalArgumentException("Sale not found: " + request.getSaleId()));
                 if (!sale.getProduct().getProductId().equals(product.getProductId())) {
                     throw new IllegalArgumentException("Sale does not match the product");
                 }
             }
-        } else if (request.getSaleId() != null) {
-            throw new IllegalArgumentException("Sale ID must not be set for a STOCK IN movement");
         }
 
         BigDecimal newStock = request.getStockType() == StockType.IN
@@ -88,12 +93,17 @@ public class StockService {
                 .map(stockMapper::toResponse);
     }
 
+    public Page<StockResponse> getCooperativeStockHistory(LocalDate from, LocalDate to, Pageable pageable) {
+        Cooperative cooperative = getCurrentUserCooperative();
+        return stockRepository.findByProduct_Cooperative_CooperativeIdAndStockDateBetween(
+                        cooperative.getCooperativeId(), from, to, pageable)
+                .map(stockMapper::toResponse);
+    }
+
     public BigDecimal getCurrentStock(UUID productId) {
         Product product = getOwnedProduct(productId, getCurrentUser());
         return product.getCurrentStockLevel() != null ? product.getCurrentStockLevel() : BigDecimal.ZERO;
     }
-
-    // --- helpers ---
 
     private Product getOwnedProductForUpdate(UUID productId, User user) {
         Cooperative cooperative = requireCooperative(user);

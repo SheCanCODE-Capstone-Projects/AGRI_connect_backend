@@ -32,6 +32,8 @@ public class ProductService {
                 .category(request.getCategory())
                 .description(request.getDescription())
                 .unitPrice(request.getUnitPrice())
+                .unit(request.getUnit())
+                .reorderThreshold(request.getReorderThreshold())
                 .storageLocation(request.getStorageLocation())
                 .dateReceived(request.getDateReceived())
                 .imageUrl(request.getImageUrl())
@@ -50,6 +52,8 @@ public class ProductService {
         product.setCategory(request.getCategory());
         product.setDescription(request.getDescription());
         product.setUnitPrice(request.getUnitPrice());
+        product.setUnit(request.getUnit());
+        product.setReorderThreshold(request.getReorderThreshold());
         product.setStorageLocation(request.getStorageLocation());
         product.setDateReceived(request.getDateReceived());
         product.setImageUrl(request.getImageUrl());
@@ -69,7 +73,10 @@ public class ProductService {
         return productRepository.findByCooperative_CooperativeId(cooperative.getCooperativeId());
     }
 
-    // --- helpers ---
+    public List<Product> listLowStockForCurrentCooperative() {
+        Cooperative cooperative = getCurrentUserCooperative();
+        return productRepository.findLowStock(cooperative.getCooperativeId());
+    }
 
     private Product getOwnedProductOrThrow(UUID productId) {
         Cooperative cooperative = getCurrentUserCooperative();

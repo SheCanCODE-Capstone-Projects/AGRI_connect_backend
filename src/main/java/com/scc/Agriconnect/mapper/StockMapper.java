@@ -23,6 +23,7 @@ public interface StockMapper {
     @Mapping(source = "product.productId", target = "productId")
     @Mapping(source = "product.name", target = "productName")
     @Mapping(source = "product.category", target = "category")
+    @Mapping(source = "product.unit", target = "unit")
     @Mapping(source = "recordedBy.fullName", target = "recordedByFullName")
     @Mapping(source = "sale.saleId", target = "saleId")
     StockResponse toResponse(Stock stock);

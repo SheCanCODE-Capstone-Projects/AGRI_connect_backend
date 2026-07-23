@@ -52,7 +52,7 @@ public class SaleService {
             customer = customerRepository.findById(request.getCustomerId())
                     .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + request.getCustomerId()));
             if (!customer.getCooperative().getCooperativeId().equals(cooperative.getCooperativeId())) {
-                throw new IllegalStateException("Customer does not beUUID to this cooperative");
+                throw new IllegalStateException("Customer does not belong to this cooperative");
             }
         }
 
@@ -66,8 +66,6 @@ public class SaleService {
 
         Sale savedSale = saleRepository.save(sale);
 
-        // Insufficient stock throws here and rolls back the sale insert above too,
-        // since this call joins the same transaction.
         StockRequest stockOut = StockRequest.builder()
                 .productId(product.getProductId())
                 .stockType(StockType.OUT)
@@ -88,6 +86,13 @@ public class SaleService {
                 .map(saleMapper::toResponse);
     }
 
+    public Page<SaleResponse> getCooperativeSales(LocalDate from, LocalDate to, Pageable pageable) {
+        Cooperative cooperative = getCurrentUserCooperative();
+        return saleRepository.findByCooperative_CooperativeIdAndSaleDateBetween(
+                        cooperative.getCooperativeId(), from, to, pageable)
+                .map(saleMapper::toResponse);
+    }
+
     public SaleResponse getSaleById(UUID saleId) {
         Cooperative cooperative = getCurrentUserCooperative();
         Sale sale = saleRepository.findById(saleId)
@@ -103,7 +108,37 @@ public class SaleService {
         return saleRepository.getTotalRevenue(cooperative.getCooperativeId());
     }
 
-    // --- helpers ---
+    public BigDecimal getRevenue(LocalDate from, LocalDate to) {
+        Cooperative cooperative = getCurrentUserCooperative();
+        return saleRepository.getRevenueBetween(cooperative.getCooperativeId(), from, to);
+    }
+
+    @Transactional
+    public SaleResponse voidSale(UUID saleId) {
+        Cooperative cooperative = getCurrentUserCooperative();
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new IllegalArgumentException("Sale not found: " + saleId));
+        if (!sale.getCooperative().getCooperativeId().equals(cooperative.getCooperativeId())) {
+            throw new IllegalStateException("You do not have access to this sale");
+        }
+        if (sale.isVoided()) {
+            throw new IllegalArgumentException("This sale has already been voided");
+        }
+
+        sale.setVoided(true);
+        saleRepository.save(sale);
+
+        StockRequest reversal = StockRequest.builder()
+                .productId(sale.getProduct().getProductId())
+                .stockType(StockType.IN)
+                .quantity(sale.getQuantitySold())
+                .stockDate(LocalDate.now())
+                .notes("Reversal for voided sale #" + sale.getSaleId())
+                .build();
+        stockService.recordStockMovement(reversal);
+
+        return saleMapper.toResponse(sale);
+    }
 
     private Cooperative requireCooperative(User user) {
         Cooperative cooperative = user.getCooperative();

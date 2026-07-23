@@ -52,6 +52,10 @@ public class Sale {
     @JoinColumn(name = "recorded_by_user_id", nullable = false)
     private User recordedBy;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean voided = false;
+
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
