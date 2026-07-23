@@ -98,6 +98,9 @@ public class ProductService {
         if (cooperative == null) {
             throw new IllegalStateException("Only cooperative members can manage products");
         }
+        if (cooperative.getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+            throw new IllegalStateException("Your cooperative is not yet approved");
+        }
         return cooperative;
     }
 }

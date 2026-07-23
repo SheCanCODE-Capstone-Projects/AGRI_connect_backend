@@ -29,6 +29,9 @@ public class StaffInvitationService {
         if (cooperative == null) {
             throw new IllegalStateException("Only a cooperative admin can invite staff");
         }
+        if (cooperative.getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+            throw new IllegalStateException("Your cooperative is not yet approved");
+        }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("A user with this email already exists");
         }

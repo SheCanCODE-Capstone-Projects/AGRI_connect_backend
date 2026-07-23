@@ -132,6 +132,9 @@ public class StockService {
         if (cooperative == null) {
             throw new IllegalStateException("Only cooperative members can manage stock");
         }
+        if (cooperative.getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+            throw new IllegalStateException("Your cooperative is not yet approved");
+        }
         return cooperative;
     }
 

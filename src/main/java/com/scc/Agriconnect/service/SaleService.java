@@ -145,6 +145,9 @@ public class SaleService {
         if (cooperative == null) {
             throw new IllegalStateException("Only cooperative members can manage sales");
         }
+        if (cooperative.getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+            throw new IllegalStateException("Your cooperative is not yet approved");
+        }
         return cooperative;
     }
 
