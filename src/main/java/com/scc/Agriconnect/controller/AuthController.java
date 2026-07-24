@@ -56,4 +56,32 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
-}
+
+    @Operation(
+        summary = "Request password reset email",
+        description = "Sends a password reset link to the user's registered email address."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Password reset email sent if user exists"),
+        @ApiResponse(responseCode = "400", description = "Invalid input or user email not found")
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+        summary = "Reset password using reset token",
+        description = "Resets the user's password using the token provided in the password reset email."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Password reset successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid or expired token, or passwords do not match")
+    })
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok().build();
+    }
+}
