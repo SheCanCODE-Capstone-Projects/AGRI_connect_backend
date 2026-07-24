@@ -84,6 +84,11 @@ public class ProductService {
         return productRepository.findByCooperative_CooperativeId(cooperative.getCooperativeId());
     }
 
+    public List<Product> listPublicProductsByCooperative(UUID cooperativeId) {
+        return productRepository.findByCooperative_CooperativeIdAndStatus(
+                cooperativeId, Product.ProductStatus.VISIBLE);
+    }
+
     // --- helpers ---
 
     private Product getOwnedProductOrThrow(UUID productId) {
