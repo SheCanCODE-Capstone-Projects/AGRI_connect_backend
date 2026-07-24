@@ -1,10 +1,13 @@
 package com.scc.Agriconnect.service;
 
 import com.scc.Agriconnect.entity.Cooperative;
+import com.scc.Agriconnect.entity.User;
 import com.scc.Agriconnect.integration.EmailService;
 import com.scc.Agriconnect.repository.CooperativeRepository;
+import com.scc.Agriconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +17,12 @@ import java.util.UUID;
 public class AdminCooperativeService {
 
     private final CooperativeRepository cooperativeRepository;
+    private final UserRepository userRepository;
     private final EmailService emailService;
+
+    public List<Cooperative> getAll() {
+        return cooperativeRepository.findAll();
+    }
 
     public List<Cooperative> getPending() {
         return cooperativeRepository.findByStatus(Cooperative.CooperativeStatus.PENDING);
@@ -52,8 +60,21 @@ public class AdminCooperativeService {
         return saved;
     }
 
+    @Transactional
+    public void delete(UUID id) {
+        Cooperative coop = getOrThrow(id);
+        List<User> users = userRepository.findByCooperative(coop);
+        for (User user : users) {
+            user.setCooperative(null);
+            userRepository.save(user);
+        }
+        coop.setPresident(null);
+        cooperativeRepository.save(coop);
+        cooperativeRepository.delete(coop);
+    }
+
     private Cooperative getOrThrow(UUID id) {
         return cooperativeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cooperative not found: " + id));
     }
-}
+}
