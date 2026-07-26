@@ -28,6 +28,7 @@ public class JwtUtil {
                 .subject(user.getUsername())
                 .claim("userId",user.getUserId().toString())
                 .claim("fullName", user.getFullName())
+                .claim("nationalId", user.getNationalId())
                 .claim("role", user.getRole().name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs));

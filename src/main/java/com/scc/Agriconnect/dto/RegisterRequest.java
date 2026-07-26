@@ -18,6 +18,10 @@ public class RegisterRequest implements PasswordConfirmable {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
+    @Schema(description = "National ID of the president", example = "1199880012345678")
+    @NotBlank(message = "National ID is required")
+    private String nationalId;
+
     @Schema(description = "Email address for the president account (used for login)", example = "president@example.com")
     @NotBlank(message = "Email is required")
     @Email (message = "Email must be valid")
