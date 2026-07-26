@@ -6,8 +6,11 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
@@ -15,7 +18,17 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI agriConnectOpenAPI() {
         final String schemeName = "bearerAuth";
+
+        Server localServer = new Server()
+                .url("http://localhost:8085")
+                .description("Local development server");
+
+        Server productionServer = new Server()
+                .url("https://agriconnectbackend-production-c9b1.up.railway.app/")
+                .description("Production server (Railway)");
+
         return new OpenAPI()
+                .servers(List.of(localServer, productionServer))
                 .info(new Info()
                         .title("AgriConnect API")
                         .version("v1")
@@ -27,7 +40,7 @@ public class OpenApiConfig {
                                 ### How to Authenticate
                                 1. **Register** a cooperative using `POST /api/auth/register`, or **Login** using `POST /api/auth/login`
                                 2. Copy the `accessToken` from the response
-                                3. Click the **Authorize** button (🔒) at the top right of this page
+                                3. Click the **Authorize** button at the top right of this page
                                 4. Enter: `Bearer <your_token>` and click **Authorize**
                                 5. All secured endpoints will now include your token automatically
 
