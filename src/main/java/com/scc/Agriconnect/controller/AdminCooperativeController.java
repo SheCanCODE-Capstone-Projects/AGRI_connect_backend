@@ -28,6 +28,24 @@ public class AdminCooperativeController {
     private final AdminCooperativeService adminCooperativeService;
 
     @Operation(
+        summary = "List all cooperatives",
+        description = "Get all registered cooperatives in the system regardless of status."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of all cooperatives retrieved successfully"
+        ),
+        @ApiResponse(responseCode = "403", description = "Access denied — SYSTEM_ADMIN role required")
+    })
+    @GetMapping
+    public ResponseEntity<List<CooperativeResponse>> getAll() {
+        var response = adminCooperativeService.getAll().stream()
+                .map(CooperativeMapper::toResponse).toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
         summary = "List pending cooperatives",
         description = "Get all cooperatives awaiting approval. New cooperatives register with PENDING status and cannot log in until approved."
     )
@@ -86,4 +104,21 @@ public class AdminCooperativeController {
             @PathVariable UUID id) {
         return ResponseEntity.ok(CooperativeMapper.toResponse(adminCooperativeService.reject(id)));
     }
-}
+
+    @Operation(
+        summary = "Delete a cooperative",
+        description = "Delete a cooperative by its ID. Requires SYSTEM_ADMIN role."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Cooperative deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Cooperative not found"),
+        @ApiResponse(responseCode = "403", description = "Access denied — SYSTEM_ADMIN role required")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "Cooperative UUID") 
+            @PathVariable UUID id) {
+        adminCooperativeService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

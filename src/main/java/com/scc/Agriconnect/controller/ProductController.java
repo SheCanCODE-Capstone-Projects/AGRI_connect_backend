@@ -31,17 +31,17 @@ public class ProductController {
     private final ProductService productService;
 
     @Operation(
-        summary = "Create a new product",
-        description = "Add a new product to the cooperative catalog. Requires PRESIDENT or STAFF role. Product will be visible by default."
+            summary = "Create a new product",
+            description = "Add a new product to the cooperative catalog. Requires PRESIDENT or STAFF role. Product will be visible by default."
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Product created successfully",
-            content = @Content(schema = @Schema(implementation = ProductResponse.class))
-        ),
-        @ApiResponse(responseCode = "400", description = "Invalid input data"),
-        @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Product created successfully",
+                    content = @Content(schema = @Schema(implementation = ProductResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PreAuthorize("hasAnyRole('PRESIDENT', 'STAFF')")
     @PostMapping
@@ -50,61 +50,80 @@ public class ProductController {
     }
 
     @Operation(
-        summary = "Update product details",
-        description = "Update an existing product's information. Requires PRESIDENT or STAFF role."
+            summary = "Update product details",
+            description = "Update an existing product's information. Requires PRESIDENT or STAFF role."
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Product updated successfully",
-            content = @Content(schema = @Schema(implementation = ProductResponse.class))
-        ),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "400", description = "Invalid input data"),
-        @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Product updated successfully",
+                    content = @Content(schema = @Schema(implementation = ProductResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PreAuthorize("hasAnyRole('PRESIDENT', 'STAFF')")
     @PutMapping("/{productId}")
     public ResponseEntity<ProductResponse> update(
-            @Parameter(description = "Product UUID") 
+            @Parameter(description = "Product UUID")
             @PathVariable UUID productId,
             @Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(ProductMapper.toResponse(productService.update(productId, request)));
     }
 
     @Operation(
-        summary = "Set product visibility",
-        description = "Show or hide a product from the catalog. Hidden products are not available for sale. Requires PRESIDENT or STAFF role."
+            summary = "Set product visibility",
+            description = "Show or hide a product from the catalog. Hidden products are not available for sale. Requires PRESIDENT or STAFF role."
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Product visibility updated successfully",
-            content = @Content(schema = @Schema(implementation = ProductResponse.class))
-        ),
-        @ApiResponse(responseCode = "404", description = "Product not found"),
-        @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Product visibility updated successfully",
+                    content = @Content(schema = @Schema(implementation = ProductResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
     })
     @PreAuthorize("hasAnyRole('PRESIDENT', 'STAFF')")
     @PatchMapping("/{productId}/visibility")
     public ResponseEntity<ProductResponse> setVisibility(
-            @Parameter(description = "Product UUID") 
+            @Parameter(description = "Product UUID")
             @PathVariable UUID productId,
-            @Parameter(description = "Set to true to show product, false to hide") 
+            @Parameter(description = "Set to true to show product, false to hide")
             @RequestParam boolean visible) {
         return ResponseEntity.ok(ProductMapper.toResponse(productService.setVisibility(productId, visible)));
     }
 
     @Operation(
-        summary = "List all products",
-        description = "Get all products belonging to the authenticated user's cooperative. Includes current stock levels."
+            summary = "Delete a product",
+            description = "Permanently delete a product. Only allowed if the product has no stock history. Requires PRESIDENT or STAFF role."
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Products retrieved successfully"
-        ),
-        @ApiResponse(responseCode = "403", description = "Access denied")
+            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Product has stock history and cannot be deleted"),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions")
+    })
+    @PreAuthorize("hasAnyRole('PRESIDENT', 'STAFF')")
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "Product UUID")
+            @PathVariable UUID productId) {
+        productService.delete(productId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "List all products",
+            description = "Get all products belonging to the authenticated user's cooperative. Includes current stock levels."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Products retrieved successfully"
+            ),
+            @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @GetMapping
     public ResponseEntity<List<ProductResponse>> list() {

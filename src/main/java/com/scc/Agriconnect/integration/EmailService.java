@@ -88,4 +88,26 @@ public class EmailService {
 
         mailSender.send(message);
     }
-}
+
+    public void sendPasswordResetEmail(String toEmail, String token) {
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("AgriConnect — Password Reset Request");
+        message.setText("""
+            Hello,
+
+            We received a request to reset the password for your AgriConnect account.
+
+            Please use the following link to reset your password:
+            %s
+
+            This link is valid for 1 hour. If you did not request a password reset, please ignore this email.
+
+            — The AgriConnect Team
+            """.formatted(resetLink));
+
+        mailSender.send(message);
+    }
+}

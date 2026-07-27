@@ -46,11 +46,16 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
+    @Transactional
+    public void delete(UUID customerId) {
+        Customer customer = getOwnedCustomerOrThrow(customerId);
+        customerRepository.delete(customer);
+    }
+
     public List<Customer> listForCurrentCooperative() {
         Cooperative cooperative = getCurrentUserCooperative();
         return customerRepository.findByCooperative_CooperativeId(cooperative.getCooperativeId());
     }
-
 
     private Customer getOwnedCustomerOrThrow(UUID customerId) {
         Cooperative cooperative = getCurrentUserCooperative();

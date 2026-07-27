@@ -11,12 +11,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
     private final CooperativeRepository cooperativeRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
@@ -64,31 +68,72 @@ public class AuthService {
                 .tokenType("Bearer")
                 .build();
     }
-        public AuthResponse login(LoginRequest request) {
-            User user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new IllegalStateException("Invalid email or password"));
 
-            if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-                throw new IllegalStateException("Invalid email or password");
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalStateException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new IllegalStateException("Invalid email or password");
+        }
+
+        if (user.getCooperative() != null
+                && user.getCooperative().getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+
+            if (user.getCooperative().getStatus() == Cooperative.CooperativeStatus.PENDING) {
+                throw new IllegalArgumentException(
+                        "Your cooperative registration is still pending approval. Please wait for a system admin to review it.");
+            } else {
+                throw new IllegalArgumentException(
+                        "Your cooperative registration was rejected. Please contact support.");
             }
+        }
 
-            if (user.getCooperative() != null
-                    && user.getCooperative().getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+        String token = jwtUtil.generateToken(user);
 
-                if (user.getCooperative().getStatus() == Cooperative.CooperativeStatus.PENDING) {
-                    throw new IllegalArgumentException(
-                            "Your cooperative registration is still pending approval. Please wait for a system admin to review it.");
-                } else {
-                    throw new IllegalArgumentException(
-                            "Your cooperative registration was rejected. Please contact support.");
-                }
-            }
+        return AuthResponse.builder()
+                .accessToken(token)
+                .tokenType("Bearer")
+                .build();
+    }
 
-            String token = jwtUtil.generateToken(user);
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("No account found with the provided email address"));
 
-            return AuthResponse.builder()
-                    .accessToken(token)
-                    .tokenType("Bearer")
-                    .build();
+        passwordResetTokenRepository.deleteByUser(user);
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusHours(1))
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+
+        try {
+            emailService.sendPasswordResetEmail(user.getEmail(), token);
+        } catch (Exception e) {
+            System.err.println("Failed to send password reset email: " + e.getMessage());
         }
     }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired password reset token"));
+
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new IllegalArgumentException("Password reset token has expired");
+        }
+
+        User user = resetToken.getUser();
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
+    }
+}
