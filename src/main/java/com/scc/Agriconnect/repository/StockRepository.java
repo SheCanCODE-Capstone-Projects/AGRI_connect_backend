@@ -21,6 +21,9 @@ public interface StockRepository extends JpaRepository<Stock, UUID> {
 
     Page<Stock> findByProduct_Cooperative_CooperativeId(UUID cooperativeId, Pageable pageable);
 
+    Page<Stock> findByProduct_Cooperative_CooperativeIdAndStockDateBetween(
+            UUID cooperativeId, LocalDate startDate, LocalDate endDate, Pageable pageable);
+
     List<Stock> findByProduct_ProductIdAndStockType(UUID productId, StockType stockType);
 
     @Query("SELECT COALESCE(SUM(s.quantity), 0) FROM Stock s " +

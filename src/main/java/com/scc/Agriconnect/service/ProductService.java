@@ -5,7 +5,6 @@ import com.scc.Agriconnect.entity.Cooperative;
 import com.scc.Agriconnect.entity.Product;
 import com.scc.Agriconnect.entity.User;
 import com.scc.Agriconnect.repository.ProductRepository;
-import com.scc.Agriconnect.repository.StockRepository;
 import com.scc.Agriconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +21,6 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final StockRepository stockRepository;
 
     @Transactional
     public Product create(ProductRequest request) {
@@ -34,6 +32,8 @@ public class ProductService {
                 .category(request.getCategory())
                 .description(request.getDescription())
                 .unitPrice(request.getUnitPrice())
+                .unit(request.getUnit())
+                .reorderThreshold(request.getReorderThreshold())
                 .storageLocation(request.getStorageLocation())
                 .dateReceived(request.getDateReceived())
                 .imageUrl(request.getImageUrl())
@@ -52,6 +52,8 @@ public class ProductService {
         product.setCategory(request.getCategory());
         product.setDescription(request.getDescription());
         product.setUnitPrice(request.getUnitPrice());
+        product.setUnit(request.getUnit());
+        product.setReorderThreshold(request.getReorderThreshold());
         product.setStorageLocation(request.getStorageLocation());
         product.setDateReceived(request.getDateReceived());
         product.setImageUrl(request.getImageUrl());
@@ -66,30 +68,15 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    @Transactional
-    public void delete(UUID productId) {
-        Product product = getOwnedProductOrThrow(productId);
-
-        boolean hasStockRecords = stockRepository.existsByProduct_ProductId(productId);
-        if (hasStockRecords) {
-            throw new IllegalStateException(
-                    "This product has stock history and cannot be deleted. Hide it instead.");
-        }
-
-        productRepository.delete(product);
-    }
-
     public List<Product> listForCurrentCooperative() {
         Cooperative cooperative = getCurrentUserCooperative();
         return productRepository.findByCooperative_CooperativeId(cooperative.getCooperativeId());
     }
 
-    public List<Product> listPublicProductsByCooperative(UUID cooperativeId) {
-        return productRepository.findByCooperative_CooperativeIdAndStatus(
-                cooperativeId, Product.ProductStatus.VISIBLE);
+    public List<Product> listLowStockForCurrentCooperative() {
+        Cooperative cooperative = getCurrentUserCooperative();
+        return productRepository.findLowStock(cooperative.getCooperativeId());
     }
-
-    // --- helpers ---
 
     private Product getOwnedProductOrThrow(UUID productId) {
         Cooperative cooperative = getCurrentUserCooperative();
@@ -110,6 +97,9 @@ public class ProductService {
         Cooperative cooperative = freshUser.getCooperative();
         if (cooperative == null) {
             throw new IllegalStateException("Only cooperative members can manage products");
+        }
+        if (cooperative.getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+            throw new IllegalStateException("Your cooperative is not yet approved");
         }
         return cooperative;
     }

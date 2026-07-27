@@ -36,17 +36,22 @@ public class Product {
     @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductUnit unit;
+
     @Column(name = "storage_location")
     private String storageLocation;
 
     @Column(name = "date_received")
     private LocalDate dateReceived;
 
-    // Maintained automatically - recalculated every time a StockMovement is recorded
-    // (in from manual restock, out from a sale). Do not set this directly from a DTO.
     @Column(name = "current_stock_level", precision = 12, scale = 2)
     @Builder.Default
     private BigDecimal currentStockLevel = BigDecimal.ZERO;
+
+    @Column(name = "reorder_threshold", precision = 12, scale = 2)
+    private BigDecimal reorderThreshold;
 
     @Column(name = "image_url")
     private String imageUrl;
