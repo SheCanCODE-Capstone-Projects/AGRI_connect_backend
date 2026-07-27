@@ -1,10 +1,12 @@
 package com.scc.Agriconnect.service;
 
+import com.scc.Agriconnect.Exception.ConflictException;
 import com.scc.Agriconnect.dto.ProductRequest;
 import com.scc.Agriconnect.entity.Cooperative;
 import com.scc.Agriconnect.entity.Product;
 import com.scc.Agriconnect.entity.User;
 import com.scc.Agriconnect.repository.ProductRepository;
+import com.scc.Agriconnect.repository.StockRepository;
 import com.scc.Agriconnect.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +23,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final StockRepository stockRepository;
 
     @Transactional
     public Product create(ProductRequest request) {
@@ -76,6 +79,19 @@ public class ProductService {
     public List<Product> listLowStockForCurrentCooperative() {
         Cooperative cooperative = getCurrentUserCooperative();
         return productRepository.findLowStock(cooperative.getCooperativeId());
+    }
+
+    public List<Product> listPublicProductsByCooperative(UUID cooperativeId) {
+        return productRepository.findByCooperative_CooperativeIdAndStatus(cooperativeId, Product.ProductStatus.VISIBLE);
+    }
+
+    @Transactional
+    public void delete(UUID productId) {
+        Product product = getOwnedProductOrThrow(productId);
+        if (stockRepository.existsByProduct_ProductId(productId)) {
+            throw new ConflictException("Product has stock history and cannot be deleted");
+        }
+        productRepository.delete(product);
     }
 
     private Product getOwnedProductOrThrow(UUID productId) {
