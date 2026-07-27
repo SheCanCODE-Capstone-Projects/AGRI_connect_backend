@@ -87,6 +87,9 @@ public class MemberService {
         if (cooperative == null) {
             throw new IllegalStateException("Only cooperative staff can manage members");
         }
+        if (cooperative.getStatus() != Cooperative.CooperativeStatus.APPROVED) {
+            throw new IllegalStateException("Your cooperative is not yet approved");
+        }
         return cooperative;
     }
 }

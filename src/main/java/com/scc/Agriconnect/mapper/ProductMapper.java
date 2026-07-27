@@ -13,9 +13,11 @@ public class ProductMapper {
                 .category(product.getCategory())
                 .description(product.getDescription())
                 .unitPrice(product.getUnitPrice())
+                .unit(product.getUnit())
                 .storageLocation(product.getStorageLocation())
                 .dateReceived(product.getDateReceived())
                 .currentStockLevel(product.getCurrentStockLevel())
+                .reorderThreshold(product.getReorderThreshold())
                 .imageUrl(product.getImageUrl())
                 .status(product.getStatus().name())
                 .build();

@@ -16,11 +16,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -34,7 +36,7 @@ public class StockController {
 
     @Operation(
         summary = "Record stock movement",
-        description = "Register a stock IN (receiving) or OUT (dispatch/wastage) transaction. Stock OUT is automatically recorded during sales. Requires PRESIDENT or STAFF role."
+        description = "Register a stock IN (receiving), OUT (dispatch/wastage), or ADJUSTMENT (correction, e.g. spoilage/loss) transaction. Stock OUT is automatically recorded during sales. Requires PRESIDENT role."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -42,11 +44,11 @@ public class StockController {
             description = "Stock movement recorded successfully",
             content = @Content(schema = @Schema(implementation = StockResponse.class))
         ),
-        @ApiResponse(responseCode = "400", description = "Invalid input data or insufficient stock for OUT movement"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data or insufficient stock for OUT/ADJUSTMENT movement"),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions"),
         @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @PreAuthorize("hasAnyRole('PRESIDENT', 'STAFF')")
+    @PreAuthorize("hasRole('PRESIDENT')")
     @PostMapping
     public ResponseEntity<StockResponse> recordMovement(@Valid @RequestBody StockRequest request) {
         return ResponseEntity.ok(stockService.recordStockMovement(request));
@@ -86,8 +88,15 @@ public class StockController {
     })
     @GetMapping
     public ResponseEntity<Page<StockResponse>> cooperativeHistory(
-            @Parameter(description = "Pagination parameters (page, size, sort)") 
+            @Parameter(description = "Filter movements from this date (inclusive)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Filter movements up to this date (inclusive)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Pagination parameters (page, size, sort)")
             @PageableDefault(size = 20) Pageable pageable) {
+        if (from != null && to != null) {
+            return ResponseEntity.ok(stockService.getCooperativeStockHistory(from, to, pageable));
+        }
         return ResponseEntity.ok(stockService.getCooperativeStockHistory(pageable));
     }
 

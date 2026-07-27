@@ -133,4 +133,13 @@ public class ProductController {
                 .toList();
         return ResponseEntity.ok(products);
     }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<ProductResponse>> lowStock() {
+        List<ProductResponse> products = productService.listLowStockForCurrentCooperative()
+                .stream()
+                .map(ProductMapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(products);
+    }
 }

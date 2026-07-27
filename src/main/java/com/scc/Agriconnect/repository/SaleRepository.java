@@ -31,11 +31,12 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
             Pageable pageable);
 
     @Query("SELECT COALESCE(SUM(s.totalAmount), 0) FROM Sale s " +
-           "WHERE s.cooperative.cooperativeId = :cooperativeId")
+           "WHERE s.cooperative.cooperativeId = :cooperativeId AND s.voided = false")
     BigDecimal getTotalRevenue(@Param("cooperativeId") UUID cooperativeId);
 
     @Query("SELECT COALESCE(SUM(s.totalAmount), 0) FROM Sale s " +
            "WHERE s.cooperative.cooperativeId = :cooperativeId " +
+           "AND s.voided = false " +
            "AND s.saleDate BETWEEN :startDate AND :endDate")
     BigDecimal getRevenueBetween(@Param("cooperativeId") UUID cooperativeId,
                                  @Param("startDate") LocalDate startDate,
@@ -76,12 +77,12 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
     List<Object[]> getMonthlySalesSummary(@Param("cooperativeId") UUID cooperativeId);
 
     @Query("SELECT COUNT(s) FROM Sale s WHERE s.cooperative.cooperativeId = :cooperativeId")
-    UUID countByCooperativeId(@Param("cooperativeId") UUID cooperativeId);
+    Long countByCooperativeId(@Param("cooperativeId") UUID cooperativeId);
 
     @Query("SELECT COUNT(s) FROM Sale s " +
            "WHERE s.cooperative.cooperativeId = :cooperativeId " +
            "AND s.saleDate BETWEEN :startDate AND :endDate")
-    UUID countByCooperativeIdAndDateRange(@Param("cooperativeId") UUID cooperativeId,
+    Long countByCooperativeIdAndDateRange(@Param("cooperativeId") UUID cooperativeId,
                                           @Param("startDate") LocalDate startDate,
                                           @Param("endDate") LocalDate endDate);
 }
