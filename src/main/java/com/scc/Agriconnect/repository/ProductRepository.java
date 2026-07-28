@@ -22,4 +22,17 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query("select p from Product p where p.cooperative.cooperativeId = :cooperativeId " +
            "and p.reorderThreshold is not null and p.currentStockLevel <= p.reorderThreshold")
     List<Product> findLowStock(@Param("cooperativeId") UUID cooperativeId);
+
+    @Query("select p from Product p where p.status = com.scc.Agriconnect.entity.Product.ProductStatus.VISIBLE " +
+           "and p.currentStockLevel > 0 " +
+           "and p.cooperative.status = com.scc.Agriconnect.entity.Cooperative.CooperativeStatus.APPROVED " +
+           "order by p.name asc")
+    List<Product> findAllPublicProducts();
+
+    @Query("select p from Product p where p.cooperative.cooperativeId = :cooperativeId " +
+           "and p.status = com.scc.Agriconnect.entity.Product.ProductStatus.VISIBLE " +
+           "and p.currentStockLevel > 0 " +
+           "and p.cooperative.status = com.scc.Agriconnect.entity.Cooperative.CooperativeStatus.APPROVED " +
+           "order by p.name asc")
+    List<Product> findPublicProductsByCooperative(@Param("cooperativeId") UUID cooperativeId);
 }
