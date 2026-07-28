@@ -81,8 +81,12 @@ public class ProductService {
         return productRepository.findLowStock(cooperative.getCooperativeId());
     }
 
+    public List<Product> listAllPublicProducts() {
+        return productRepository.findAllPublicProducts();
+    }
+
     public List<Product> listPublicProductsByCooperative(UUID cooperativeId) {
-        return productRepository.findByCooperative_CooperativeIdAndStatus(cooperativeId, Product.ProductStatus.VISIBLE);
+        return productRepository.findPublicProductsByCooperative(cooperativeId);
     }
 
     @Transactional
