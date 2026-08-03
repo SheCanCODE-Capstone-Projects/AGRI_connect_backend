@@ -19,12 +19,14 @@ public interface SaleMapper {
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "recordedBy", ignore = true)
     @Mapping(target = "totalAmount", ignore = true)
+    @Mapping(target = "voided", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     Sale toEntity(SaleRequest request);
 
     @Mapping(source = "product.productId", target = "productId")
     @Mapping(source = "product.name", target = "productName")
     @Mapping(source = "product.category", target = "category")
+    @Mapping(source = "product.unit", target = "unit")
     @Mapping(source = "cooperative.cooperativeId", target = "cooperativeId")
     @Mapping(source = "cooperative.name", target = "cooperativeName")
     @Mapping(source = "customer.customerId", target = "customerId")
@@ -38,6 +40,7 @@ public interface SaleMapper {
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "recordedBy", ignore = true)
     @Mapping(target = "totalAmount", ignore = true)
+    @Mapping(target = "voided", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     void updateEntity(@MappingTarget Sale sale, SaleRequest request);
 }
