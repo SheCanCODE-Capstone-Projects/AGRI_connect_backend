@@ -34,5 +34,4 @@ build/
 .dockerignore
 .gitignore
 node_modules
-.env
-.vscode/
+config.bat
